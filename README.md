@@ -454,6 +454,33 @@ See the [LICENSE](LICENSE) file for details.
 **Blog**: [goastro.website](https://goastro.website)  
 **Last Updated**: November 13, 2025
 
+## 📦 Docker Hub publishing (CI)
+
+This repository includes a GitHub Actions workflow that can build and publish the Docker image to Docker Hub when changes are pushed to the `main` branch.
+
+To enable automatic publishing:
+
+1. Create a Docker Hub repository (for example `DOCKERHUB_USERNAME/agl-poky-dev`).
+2. In GitHub, go to Settings → Secrets and variables → Actions and add two repository secrets:
+  - `DOCKERHUB_USERNAME` — your Docker Hub username
+  - `DOCKERHUB_TOKEN` — a Docker Hub access token (recommended) or your password
+3. Push to the `main` branch. The workflow at `.github/workflows/docker-publish.yml` will build multi-arch images (linux/amd64, linux/arm64) and push them to Docker Hub.
+
+If you prefer to publish manually from your machine, run:
+
+```bash
+# Build locally and tag for Docker Hub
+docker build --build-arg BASE_DISTRO=ubuntu-22.04 -t <DOCKERHUB_USERNAME>/agl-poky-dev:latest .
+
+# Login to Docker Hub
+docker login -u <DOCKERHUB_USERNAME>
+
+# Push image
+docker push <DOCKERHUB_USERNAME>/agl-poky-dev:latest
+```
+
+Replace `<DOCKERHUB_USERNAME>` with your Docker Hub username. The automated workflow uses these secrets to authenticate and push the image on every push to `main`.
+
 ---
 
 ### Quick Reference Card
