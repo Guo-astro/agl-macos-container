@@ -6,6 +6,7 @@ A Docker-based development environment for building Automotive Grade Linux (AGL)
 [![Platform](https://img.shields.io/badge/Platform-macOS-lightgrey.svg)](https://www.apple.com/macos/)
 [![AGL](https://img.shields.io/badge/AGL-Ready-green.svg)](https://www.automotivelinux.org/)
 [![Yocto](https://img.shields.io/badge/Yocto-Compatible-orange.svg)](https://www.yoctoproject.org/)
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-dnangellight%2Fagl--poky--dev-blue)](https://hub.docker.com/r/dnangellight/agl-poky-dev)
 
 > **Blog Reference**: This setup is based on the detailed guide at [Building AGL Development Environment on Mac (2025)](https://goastro.website/blog/building-agl-dev-env-mac-1-build-yocto-using-docker-2025/)
 
@@ -48,6 +49,27 @@ A Docker-based development environment for building Automotive Grade Linux (AGL)
 - **CPU**: Multi-core processor recommended (builds are CPU-intensive)
 
 ## 🚀 Quick Start
+
+```bash
+# Option 1: Use pre-built image from Docker Hub (recommended)
+docker pull dnangellight/agl-poky-dev:latest
+
+# Create and setup workspace volume
+docker volume create --name myvolume
+docker run -it --rm -v myvolume:/workdir busybox chown -R 1000:1000 /workdir
+
+# Start the development container
+docker run --rm -it -v myvolume:/workdir dnangellight/agl-poky-dev:latest --workdir=/workdir
+
+# Inside container: Clone Poky and start building
+cd /workdir
+git clone git://git.yoctoproject.org/poky
+cd poky
+source oe-init-build-env
+bitbake core-image-minimal
+```
+
+**Or build locally:**
 
 ```bash
 # 1. Clone this repository
@@ -283,15 +305,15 @@ AGL Development Environment Verification
 
 ```bash
 # Check Qt versions
-docker run --rm agl-poky-dev:latest -- qmake --version
-docker run --rm agl-poky-dev:latest -- qmake6 --version
+docker run --rm dnangellight/agl-poky-dev:latest -- qmake --version
+docker run --rm dnangellight/agl-poky-dev:latest -- qmake6 --version
 
 # Check BitBake
-docker run --rm -v myvolume:/workdir agl-poky-dev:latest --workdir=/workdir \
+docker run --rm -v myvolume:/workdir dnangellight/agl-poky-dev:latest --workdir=/workdir \
   -- /bin/bash -c "cd /workdir/poky && source oe-init-build-env && bitbake --version"
 
 # Check library versions
-docker run --rm agl-poky-dev:latest -- pkg-config --modversion \
+docker run --rm dnangellight/agl-poky-dev:latest -- pkg-config --modversion \
   wayland-client gstreamer-1.0 dbus-1 libwebsockets
 ```
 
@@ -300,11 +322,11 @@ docker run --rm agl-poky-dev:latest -- pkg-config --modversion \
 ### Starting Your Work Session
 
 ```bash
-# 1. Start Samba (if using Finder integration)
+# Start Samba (if using Finder integration)
 docker start samba && sudo ifconfig lo0 127.0.0.2 alias up
 
-# 2. Start development container
-docker run --rm -it -v myvolume:/workdir agl-poky-dev:latest --workdir=/workdir
+# 2. Start development container (using Docker Hub image)
+docker run --rm -it -v myvolume:/workdir dnangellight/agl-poky-dev:latest --workdir=/workdir
 
 # 3. Navigate to your project
 cd /workdir/poky  # or your AGL workspace
@@ -484,6 +506,28 @@ Replace `<DOCKERHUB_USERNAME>` with your Docker Hub username. The automated work
 ---
 
 ### Quick Reference Card
+
+```bash
+# Pull pre-built image from Docker Hub
+docker pull dnangellight/agl-poky-dev:latest
+
+# Setup workspace
+docker volume create --name myvolume
+docker run -it --rm -v myvolume:/workdir busybox chown -R 1000:1000 /workdir
+
+# Start Samba (optional)
+docker create -t -p 445:445 --name samba -v myvolume:/workdir crops/samba
+docker start samba && sudo ifconfig lo0 127.0.0.2 alias up
+
+# Start container
+docker run --rm -it -v myvolume:/workdir dnangellight/agl-poky-dev:latest --workdir=/workdir
+
+# Inside container
+source oe-init-build-env
+bitbake core-image-minimal
+```
+
+**Build locally (alternative):**
 
 ```bash
 # Build image
